@@ -9,7 +9,8 @@ CREATE TABLE IF NOT EXISTS habits (
     habit TEXT NOT NULL
 )
 """)
-cursor.execute()
+cursor.execute("""
+""")
 
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS habit_dates (

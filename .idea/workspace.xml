@@ -55,7 +55,7 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager" selected="Python.create_db">
+  <component name="RunManager" selected="Python.main">
     <configuration name="create_db" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Habbitly-BTU-Final-Project" />
       <option name="ENV_FILES" value="" />
@@ -127,7 +127,7 @@
       <workItem from="1752063845461" duration="68000" />
       <workItem from="1752063923573" duration="187000" />
       <workItem from="1752064122875" duration="85000" />
-      <workItem from="1752064293529" duration="2220000" />
+      <workItem from="1752064293529" duration="4183000" />
     </task>
     <servers />
   </component>
@@ -135,7 +135,7 @@
     <option name="version" value="3" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Habbitly_BTU_Final_Project$main.coverage" NAME="main Coverage Results" MODIFIED="1752066430480" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Habbitly_BTU_Final_Project$create_db.coverage" NAME="create_db Coverage Results" MODIFIED="1752066458088" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Habbitly_BTU_Final_Project$main.coverage" NAME="main Coverage Results" MODIFIED="1752068419789" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Habbitly_BTU_Final_Project$create_db.coverage" NAME="create_db Coverage Results" MODIFIED="1752066671581" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
