@@ -1,8 +1,9 @@
 import sys
+import sqlite3
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QDialog, QVBoxLayout,
     QCalendarWidget, QDialogButtonBox, QLineEdit, QPushButton,
-    QCheckBox, QListWidget, QInputDialog
+    QCheckBox, QListWidget, QInputDialog, QScrollArea, QWidget
 )
 from PyQt5.QtCore import QDate
 from ui_habbitly import Ui_MainWindow
@@ -85,9 +86,27 @@ class MyApp(QMainWindow, Ui_MainWindow):  #eseni dzaan common senseia mixvdebi
         super().__init__()
         self.setupUi(self)
 
+        self.conn = sqlite3.connect("habits.db")  #მიმდევრობა bazastan
+        self.cursor = self.conn.cursor()
+        self.create_table()
+
         self.habits = []
 
-        self.scrollLayout = QVBoxLayout(self.scrollAreaWidgetContents)
+        # --- Scroll area with top alignment ---
+        self.scroll_area = self.scrollArea  # უკვე UI-ში გაქვს scrollArea
+        self.scroll_area.setWidgetResizable(True)
+
+        # კონტეინერი ვიჯეტი (scrollAreaWidgetContents უკვე გაქვს UI-ში)
+        self.scroll_content = self.scrollAreaWidgetContents
+
+        # მთავარი ლეიაუტი ჩვევებისთვის
+        self.layout = QVBoxLayout(self.scroll_content)
+
+        # stretch რათა ყველა checkBox ზემოდან იყოს და ქვემოთ დაიწიოს სივრცე
+        self.layout.addStretch()
+
+        # მაგ ლეიაუტს მივანიჭებთ, როგორც habit-ების ლეიაუტს
+        self.scrollLayout = self.layout
 
         today = QDate.currentDate()
         self.dateButton.setText(today.toString("d MMMM yyyy"))
@@ -95,6 +114,32 @@ class MyApp(QMainWindow, Ui_MainWindow):  #eseni dzaan common senseia mixvdebi
 
         self.addButton.clicked.connect(self.show_add_dialog)
         self.cusButton.clicked.connect(self.show_customize_dialog)
+
+        self.load_habits()  #bazidan chawera
+
+    def create_table(self):
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS habits (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                habit TEXT NOT NULL UNIQUE
+            )
+        ''')
+        self.conn.commit()
+
+    def load_habits(self):  #apshi chawera checkmarkebit bazidan
+        self.cursor.execute("SELECT habit FROM habits")
+        rows = self.cursor.fetchall()
+        for row in rows:
+            habit = row[0]
+            cb = QCheckBox(habit)
+            cb.setStyleSheet("color: pink;")
+
+            # დინამურად დაამატე checkBox-ები ზემოდან
+            self.scrollLayout.takeAt(self.scrollLayout.count() - 1)
+            self.scrollLayout.addWidget(cb)
+            self.scrollLayout.addStretch()
+
+            self.habits.append(habit)
 
     def show_date_picker(self):
         dialog = DatePickerDialog(self)
@@ -110,11 +155,24 @@ class MyApp(QMainWindow, Ui_MainWindow):  #eseni dzaan common senseia mixvdebi
         dialog = AddHabitDialog()
         if dialog.exec_():
             habit = dialog.get_habit()
-            if habit:
-                cb = QCheckBox(habit)
-                cb.setStyleSheet("color: pink;")
-                self.scrollLayout.addWidget(cb)
-                self.habits.append(habit)
+            if habit and habit not in self.habits:
+                try:
+                    self.cursor.execute("INSERT INTO habits (habit) VALUES (?)", (habit,))
+                    self.conn.commit()
+                    cb = QCheckBox(habit)
+                    cb.setStyleSheet("color: pink;")
+
+                    # stretch-ს მოვხსნით დროებით
+                    self.scrollLayout.takeAt(self.scrollLayout.count() - 1)
+                    self.scrollLayout.addWidget(cb)
+                    self.scrollLayout.addStretch()
+
+                    # scroll ზემოთ
+                    self.scroll_area.verticalScrollBar().setValue(0)
+
+                    self.habits.append(habit)
+                except sqlite3.IntegrityError:
+                    print("Habit already exists in database")
 
     def show_customize_dialog(self):
         dialog = CustomizeDialog(self.habits)
