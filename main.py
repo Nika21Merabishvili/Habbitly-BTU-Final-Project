@@ -1,68 +1,131 @@
+
+
+
 import sys
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow, QDialog, QCalendarWidget, QDialogButtonBox, QVBoxLayout
+from PyQt5.QtWidgets import (
+    QApplication, QMainWindow, QDialog, QVBoxLayout,
+    QCalendarWidget, QDialogButtonBox, QLineEdit, QPushButton,
+    QCheckBox, QListWidget, QInputDialog
+)
 from PyQt5.QtCore import QDate
 from ui_habbitly import Ui_MainWindow
 
 
-#ამას წავშლით მარა გასარკვევი რო იყოს
 class DatePickerDialog(QDialog):
     def __init__(self, parent=None):
-        
         super().__init__(parent)
-        self.setWindowTitle("Select Date")  #popupის სათაური
-        self.setFixedSize(300, 300)  #ზომა
+        self.setWindowTitle("Select Date")
+        self.setFixedSize(300, 300)
 
-        self.calendar = QCalendarWidget(self)   #ვიღებთ QCalen... widgets da vanichebt calendars selfit
-        self.calendar.setGridVisible(True)     #ხაზები რო ჩანდეს თვითონ კალენდარშ
-        self.calendar.setSelectedDate(QDate.currentDate()) #დღევანდელი თარიღი ჩანდეს თავდაპირველად
-        self.calendar.setStyleSheet("color: white;")
+        self.calendar = QCalendarWidget(self)
+        self.calendar.setGridVisible(True)
+        self.calendar.setSelectedDate(QDate.currentDate())
 
-        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel) #cancel da ok functions
-        self.buttonBox.accepted.connect(self.accept) #ok-ზე accept აბრუნებს
+        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
 
-        self.buttonBox.rejected.connect(self.reject) #cancel-ზე reject აბრუნებს (ორივე შემთხვევაშ საწყის გვერდზე გვაბრუნებს)
-        font = QtGui.QFont()
-        font.setFamily("Calibri")
-        self.buttonBox.setFont(font)
-        self.buttonBox.setStyleSheet("color:white;")
-
-        # ესენი ძაან basic არის მიხვდები თვითონაც
         layout = QVBoxLayout()
         layout.addWidget(self.calendar)
         layout.addWidget(self.buttonBox)
         self.setLayout(layout)
 
-    def selected_date(self):     #(არჩეული თარიღის დაბრუნება/გადაცემა)
+    def selected_date(self):
         return self.calendar.selectedDate()
 
 
+class AddHabitDialog(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Add Habit")
+        self.setFixedSize(300, 100)
+        layout = QVBoxLayout()
+        self.input = QLineEdit()
+        self.input.setPlaceholderText("Enter habit")
+        save_button = QPushButton("Save")
+        save_button.clicked.connect(self.accept)
+        layout.addWidget(self.input)
+        layout.addWidget(save_button)
+        self.setLayout(layout)
+
+    def get_habit(self):
+        return self.input.text()
+
+
+class CustomizeDialog(QDialog):
+    def __init__(self, habits):
+        super().__init__()
+        self.setWindowTitle("Customize Habits")
+        self.setFixedSize(300, 300)
+        self.habits = habits
+        self.list_widget = QListWidget()
+        self.list_widget.addItems(habits)
+        self.edit_btn = QPushButton("Edit")
+        self.delete_btn = QPushButton("Delete")
+        layout = QVBoxLayout()
+        layout.addWidget(self.list_widget)
+        layout.addWidget(self.edit_btn)
+        layout.addWidget(self.delete_btn)
+        self.setLayout(layout)
+        self.edit_btn.clicked.connect(self.edit_item)
+        self.delete_btn.clicked.connect(self.delete_item)
+
+    def edit_item(self):
+        item = self.list_widget.currentItem()
+        if item:
+            new_text, ok = QInputDialog.getText(self, "Edit Habit", "New name:", text=item.text())
+            if ok and new_text:
+                item.setText(new_text)
+
+    def delete_item(self):
+        item = self.list_widget.currentItem()
+        if item:
+            self.list_widget.takeItem(self.list_widget.row(item))
+
+
 class MyApp(QMainWindow, Ui_MainWindow):
- def __init__(self):
-  super().__init__()
-  self.setupUi(self)  # UI დიზაინის დაყენება
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
 
-  # ვანიშნებთ დღეს და ვსვამთ dateButton-ზე ტექსტად
-  today = QDate.currentDate()
-  self.dateButton.setText(today.toString("d MMMM yyyy"))  # მაგ. "9 July 2025"
+        self.habits = []
 
-  # ღილაკზე დაჭერისას კალენდრის popup გამოჩნდება
-  self.dateButton.clicked.connect(self.show_date_picker)
+        self.scrollLayout = QVBoxLayout(self.scrollAreaWidgetContents)
 
- # popup კალენდრის ჩვენება
- def show_date_picker(self):
-  dialog = DatePickerDialog(self)  # popup ფანჯრის შექმნა
-  if dialog.exec_() == QDialog.Accepted:  # თუ OK-ს დააჭირა
-   selected_date = dialog.selected_date()  # აიღე არჩეული თარიღი
-   self.dateButton.setText(selected_date.toString("d MMMM yyyy"))  # ღილაკზე შეცვალე ტექსტი
-   self.getDate()  # ბეჭდავს არჩეულ თარიღს ტერმინალში
+        today = QDate.currentDate()
+        self.dateButton.setText(today.toString("d MMMM yyyy"))
+        self.dateButton.clicked.connect(self.show_date_picker)
 
- # ფუნქცია რომელიც ბეჭდავს მიმდინარე თარიღს ტერმინალში
- def getDate(self):
-  print("Selected date is:", self.dateButton.text())
+        self.addButton.clicked.connect(self.show_add_dialog)
+        self.cusButton.clicked.connect(self.show_customize_dialog)
+
+    def show_date_picker(self):
+        dialog = DatePickerDialog(self)
+        if dialog.exec_() == QDialog.Accepted:
+            selected_date = dialog.selected_date()
+            self.dateButton.setText(selected_date.toString("d MMMM yyyy"))
+            self.getDate()
+
+    def getDate(self):
+        print("Selected date is:", self.dateButton.text())
+
+    def show_add_dialog(self):
+        dialog = AddHabitDialog()
+        if dialog.exec_():
+            habit = dialog.get_habit()
+            if habit:
+                cb = QCheckBox(habit)
+                cb.setStyleSheet("color: pink;")
+                self.scrollLayout.addWidget(cb)
+                self.habits.append(habit)
+
+    def show_customize_dialog(self):
+        dialog = CustomizeDialog(self.habits)
+        dialog.exec_()
 
 
-app = QApplication(sys.argv)
-window = MyApp()
-window.show()
-sys.exit(app.exec())
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    window = MyApp()
+    window.show()
+    sys.exit(app.exec_())
