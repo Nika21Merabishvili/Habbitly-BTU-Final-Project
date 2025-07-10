@@ -1,10 +1,8 @@
 import sqlite3
 
-# Connect or create the database file
 conn = sqlite3.connect("habits.db")
 cursor = conn.cursor()
 
-# Main habits table
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS habits (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -14,7 +12,6 @@ cursor.execute('''
     )
 ''')
 
-# Habit completion tracking table
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS habit_dates (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

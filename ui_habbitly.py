@@ -91,14 +91,12 @@ class Ui_MainWindow(object):
         self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame.setObjectName("frame")
-        # Remove commandLinkButton and add logo image
         self.logoLabel = QtWidgets.QLabel(self.centralwidget)
         self.logoLabel.setGeometry(QtCore.QRect(710, 10, 100, 100))
         self.logoLabel.setObjectName("logoLabel")
         pixmap = QtGui.QPixmap("habbitlylogo.png")
         self.logoLabel.setPixmap(pixmap)
         self.logoLabel.setScaledContents(True)
-        # Remove old commandLinkButton
         # self.commandLinkButton = QtWidgets.QCommandLinkButton(self.centralwidget)
         # self.commandLinkButton.setGeometry(QtCore.QRect(600, 60, 185, 41))
         # self.commandLinkButton.setObjectName("commandLinkButton")

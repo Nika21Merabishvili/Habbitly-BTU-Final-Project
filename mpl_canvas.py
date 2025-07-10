@@ -9,5 +9,4 @@ class MplCanvas(FigureCanvas):
         super().__init__(self.fig)
         self.setParent(parent)
 
-        # Optional: set tight layout for better fit
         self.fig.tight_layout()

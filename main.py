@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QDate, pyqtSignal, QTimer, Qt
 from PyQt5.QtGui import QFont
-from ui_habbitly import Ui_MainWindow  # Make sure this matches your actual UI file name
+from ui_habbitly import Ui_MainWindow  
 import matplotlib.pyplot as plt
 from mpl_canvas import MplCanvas
 
@@ -36,6 +36,7 @@ class AddHabitDialog(QDialog):
         super().__init__()
         self.setWindowTitle("Add Habit")
         self.setFixedSize(300, 100)
+        self.setStyleSheet("background-color: #242424; color: white;")
         layout = QVBoxLayout()
         self.input = QLineEdit()
         self.input.setPlaceholderText("Enter habit")
@@ -61,6 +62,7 @@ class CustomizeDialog(QDialog):
         super().__init__()
         self.setWindowTitle("Customize Habits")
         self.setFixedSize(300, 300)
+        self.setStyleSheet("background-color: #242424; color: white;")
         self.conn = sqlite3.connect("habits.db")
         self.cursor = self.conn.cursor()
         self.list_widget = QListWidget()
@@ -105,14 +107,11 @@ class CustomizeDialog(QDialog):
                                            QMessageBox.Yes | QMessageBox.No)
             if confirm == QMessageBox.Yes:
                 try:
-                    # Get the habit ID first
                     self.cursor.execute("SELECT id FROM habits WHERE habit = ?", (habit_text,))
                     habit_id = self.cursor.fetchone()[0]
 
-                    # Delete from habit_dates first to maintain referential integrity
                     self.cursor.execute("DELETE FROM habit_dates WHERE habit_id = ?", (habit_id,))
 
-                    # Then delete from habits
                     self.cursor.execute("DELETE FROM habits WHERE id = ?", (habit_id,))
 
                     self.conn.commit()
@@ -142,7 +141,6 @@ class MyApp(QMainWindow, Ui_MainWindow):
         self.addButton.clicked.connect(self.show_add_dialog)
         self.cusButton.clicked.connect(self.show_customize_dialog)
 
-        # Matplotlib canvas for the frame
         self.mpl_canvas = MplCanvas(self.frame, width=2.5, height=4.0, dpi=100)
         self.mpl_layout = QVBoxLayout(self.frame)
         self.mpl_layout.setContentsMargins(0, 0, 0, 0)
@@ -219,9 +217,8 @@ class MyApp(QMainWindow, Ui_MainWindow):
         self.mpl_canvas.fig.patch.set_facecolor('#242424')
         for spine in self.mpl_canvas.axes.spines.values():
             spine.set_visible(False)
-        # Set x-axis to start at 0 and use integer ticks only
         self.cursor.execute('''SELECT * FROM habits''')
-        p = [len(self.cursor.fetchall())]  # Get the number of habits
+        p = [len(self.cursor.fetchall())]  
         if max(l) == 0:
             self.mpl_canvas.axes.set_xlim(left=0, right=5)
         else:
@@ -237,7 +234,6 @@ class MyApp(QMainWindow, Ui_MainWindow):
         self.mpl_canvas.draw()
 
     def load_habits_for_date(self, qdate):
-        # Clear existing widgets
         while self.scrollLayout.count() > 1:
             item = self.scrollLayout.takeAt(0)
             widget = item.widget()
@@ -246,7 +242,6 @@ class MyApp(QMainWindow, Ui_MainWindow):
 
         selected_str = qdate.toString("yyyy-MM-dd")
 
-        # Get all active habits (not deleted) that were created before or on the selected date
         self.cursor.execute('''
             SELECT id, habit FROM habits
             WHERE deleted_date IS NULL AND created_date <= ?
@@ -256,29 +251,23 @@ class MyApp(QMainWindow, Ui_MainWindow):
         self.habits = []
 
         for habit_id, habit_name in habits:
-            # Create a container widget for each habit
             habit_widget = QWidget()
             habit_layout = QHBoxLayout()
             habit_widget.setLayout(habit_layout)
 
-            # Create the checkbox
             cb = QCheckBox(habit_name)
             cb.setStyleSheet("color: white;")
 
-            # Calculate streak
             streak = self.calculate_streak(habit_id, selected_str)
 
-            # Create streak label
             streak_label = QLabel(f"🔥 {streak}")
             streak_label.setStyleSheet("color: #FFA500; font-weight: bold;")
             streak_label.setAlignment(Qt.AlignRight)
 
-            # Add widgets to layout
             habit_layout.addWidget(cb)
             habit_layout.addWidget(streak_label)
             habit_layout.addStretch()
 
-            # Check if habit was completed on this date
             self.cursor.execute('''
                 SELECT completed FROM habit_dates
                 WHERE habit_date = ? AND habit_id = ?
@@ -288,7 +277,6 @@ class MyApp(QMainWindow, Ui_MainWindow):
             if result and result[0] == 1:
                 cb.setChecked(True)
 
-            # Connect checkbox change to update database
             def update_status(state, habit_id=habit_id):
                 completed = 1 if state == Qt.Checked else 0
                 self.cursor.execute('''
@@ -298,7 +286,6 @@ class MyApp(QMainWindow, Ui_MainWindow):
                 ''', (selected_str, habit_id, completed, completed))
                 self.conn.commit()
                 self.update_progress_bar()
-                # Refresh the streak display
                 self.load_habits_for_date(self.current_date)
                 self.update_graph()
 
